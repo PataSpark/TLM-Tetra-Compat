@@ -345,6 +345,13 @@ public final class TetraCrossbowProjectileHelper {
                 )
         );
 
+        // 觸發 Tetra 原生武器使用效果
+        crossbow.applyUsageEffects(
+                maid,
+                crossbowStack,
+                1.0
+        );
+
         maid.level().playSound(
                 null,
                 maid.getX(),
