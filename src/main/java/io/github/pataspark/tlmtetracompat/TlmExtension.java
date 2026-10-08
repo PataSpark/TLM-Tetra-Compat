@@ -21,5 +21,16 @@ public class TlmExtension implements ILittleMaid {
         );
 
         manager.add(tetraBowAttack);
+
+        // Register Tetra crossbow task
+        TetraCrossbowAttack tetraCrossbowAttack =
+                new TetraCrossbowAttack();
+
+        TlmTetraCompat.LOGGER.info(
+                "TLM-Tetra-Compat: Registering task {}",
+                tetraCrossbowAttack.getUid()
+        );
+
+        manager.add(tetraCrossbowAttack);
     }
 }
