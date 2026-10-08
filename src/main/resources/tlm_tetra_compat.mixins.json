@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.pataspark.tlmtetracompat.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "tlm_tetra_compat.refmap.json",
+  "mixins": [],
+  "client": [
+    "AnimationManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

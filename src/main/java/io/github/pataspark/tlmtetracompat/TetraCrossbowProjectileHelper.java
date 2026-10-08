@@ -241,14 +241,24 @@ public final class TetraCrossbowProjectileHelper {
                 maid
         );
 
-        double dy = target.getY()
-                + target.getBbHeight() * 0.5
+        // 使用與 Minecraft 原版弩相同的目標高度
+        double dy = target.getY(0.75)
                 - firstArrow.getY();
 
-        // 建立中心射擊方向
+        // Tetra 弩的實際箭矢速度
+        float actualVelocity = projectileVelocity * 3.15F;
+
+        // 估算箭矢到達目標所需的飛行時間
+        double flightTime = horizontalDistance / actualVelocity;
+
+        // 估算重力造成的垂直下墜
+        double compensation = 0.5 * 0.05
+                * flightTime * flightTime;
+
+        // 計算射擊方向
         Vec3 baseDirection = new Vec3(
                 dx,
-                dy + horizontalDistance * 0.1,
+                dy + compensation,
                 dz
         ).normalize();
 
