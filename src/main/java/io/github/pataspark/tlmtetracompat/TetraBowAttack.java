@@ -11,15 +11,10 @@ import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
-import se.mickelus.tetra.items.modular.impl.bow.ModularBowItem;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.resources.ResourceLocation;
+import se.mickelus.tetra.items.modular.impl.bow.ModularBowItem;
 import java.util.List;
-import se.mickelus.tetra.properties.TetraAttributes;
 
 public class TetraBowAttack extends TaskBowAttack {
 
@@ -129,7 +124,7 @@ public class TetraBowAttack extends TaskBowAttack {
                 ) * 20.0F
         );
 
-        boolean fired = TetraBowProjectileHelper.fireSingleArrow(
+        int firedCount = TetraBowProjectileHelper.fireMultipleArrows(
                 shooter,
                 target,
                 bowStack,
@@ -137,17 +132,12 @@ public class TetraBowAttack extends TaskBowAttack {
                 drawProgress
         );
 
-        if (fired) {
-            arrowStack.shrink(1);
-        }
-    }
-
-    private double getTetraDrawStrength(ItemStack bowStack) {
-        ModularBowItem bow = (ModularBowItem) bowStack.getItem();
-
-        return bow.getAttributeValue(
+        if (firedCount > 0
+                && !TetraBowProjectileHelper.isInfiniteAmmo(
                 bowStack,
-                TetraAttributes.drawStrength.get()
-        );
+                arrowStack
+        )) {
+            arrowStack.shrink(firedCount);
+        }
     }
 }

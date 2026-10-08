@@ -16,7 +16,6 @@ public class TetraShootTargetTask extends Behavior<EntityMaid> {
 
     private int seeTime = 0;
     private int attackTime = 0;
-    private int powerTime = 0;
 
     public TetraShootTargetTask() {
         super(
@@ -50,7 +49,6 @@ public class TetraShootTargetTask extends Behavior<EntityMaid> {
 
         seeTime = 0;
         attackTime = 0;
-        powerTime = 0;
 
         maid.setSwingingArms(true);
     }
@@ -63,7 +61,6 @@ public class TetraShootTargetTask extends Behavior<EntityMaid> {
 
         seeTime = 0;
         attackTime = 0;
-        powerTime = 0;
 
         maid.setSwingingArms(false);
         maid.stopUsingItem();
@@ -111,11 +108,9 @@ public class TetraShootTargetTask extends Behavior<EntityMaid> {
                         );
 
                 if (usedTicks >= requiredTicks) {
-                    powerTime = usedTicks;
-
                     float drawProgress = Math.min(
                             1.0F,
-                            (float) powerTime / Math.max(1, requiredTicks)
+                            (float) usedTicks / Math.max(1, requiredTicks)
                     );
 
                     maid.performRangedAttack(target, drawProgress);
