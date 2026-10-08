@@ -13,6 +13,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
+import se.mickelus.tetra.event.ModularProjectileSpawnEvent;
 import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
 import se.mickelus.tetra.effect.ItemEffect;
 import se.mickelus.tetra.properties.AttributeHelper;
@@ -316,6 +318,18 @@ public final class TetraCrossbowProjectileHelper {
                     rotatedZ,
                     projectileVelocity * 3.15F,
                     1.0F
+            );
+
+            // 觸發 Tetra 原生投射物生成事件
+            MinecraftForge.EVENT_BUS.post(
+                    new ModularProjectileSpawnEvent(
+                            crossbowStack,
+                            ammoStack,
+                            maid,
+                            arrow,
+                            maid.level(),
+                            1
+                    )
             );
 
             boolean spawned = maid.level().addFreshEntity(arrow);

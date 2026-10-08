@@ -1,6 +1,12 @@
+
 {
   "task.tlm_tetra_compat.tetra_bow_attack": "Tetra 弓兵",
   "task.tlm_tetra_compat.tetra_bow_attack.desc": "女仆会使用 Tetra 模组弓，主动射击附近的敌对生物。",
   "task.tlm_tetra_compat.tetra_bow_attack.condition.has_bow": "主手持有 Tetra 弓",
-  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_arrow": "背包内有箭"
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_arrow": "背包内有箭",
+
+  "task.tlm_tetra_compat.tetra_crossbow_attack": "Tetra 弩兵",
+  "task.tlm_tetra_compat.tetra_crossbow_attack.desc": "女仆会使用 Tetra 模组弩，主动装填并射击附近的敌对生物。",
+  "task.tlm_tetra_compat.tetra_crossbow_attack.condition.has_crossbow": "主手持有 Tetra 弩",
+  "task.tlm_tetra_compat.tetra_crossbow_attack.condition.has_ammunition": "背包内有箭"
 }
