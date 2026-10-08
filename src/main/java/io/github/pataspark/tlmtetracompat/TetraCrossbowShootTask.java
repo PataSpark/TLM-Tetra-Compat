@@ -13,12 +13,7 @@ import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import com.mojang.logging.LogUtils;
-
 public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     private enum CrossbowState {
         UNCHARGED,
@@ -80,12 +75,6 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
             EntityMaid maid,
             long gameTime) {
 
-        LOGGER.info(
-                "[TLM Tetra Compat] ShootTask STOP, "
-                        + "state=" + state
-                        + ", swingingArms=" + maid.isSwingingArms()
-        );
-
         state = CrossbowState.UNCHARGED;
         chargeTime = 0;
         attackDelay = 0;
@@ -132,18 +121,6 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
             return;
         }
 
-        if (state == CrossbowState.READY_TO_ATTACK
-                && attackDelay % 5 == 0) {
-
-            LOGGER.info(
-                    "[TLM Tetra Compat] "
-                            + "state=" + state
-                            + ", attackDelay=" + attackDelay
-                            + ", swingingArms=" + maid.isSwingingArms()
-                            + ", isUsingItem=" + maid.isUsingItem()
-            );
-        }
-
         switch (state) {
 
             case UNCHARGED -> {
@@ -171,19 +148,6 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
                         stack,
                         maid
                 );
-
-                if (chargeTime % 10 == 0) {
-                    LOGGER.info(
-                            "[TLM Tetra Compat] "
-                                    + "chargeTime=" + chargeTime
-                                    + ", requiredTicks=" + requiredTicks
-                                    + ", isUsingItem=" + maid.isUsingItem()
-                                    + ", useItemRemainingTicks="
-                                    + maid.getUseItemRemainingTicks()
-//                                    + ", isChargingCrossbow="
-//                                    + maid.isChargingCrossbow()
-                    );
-                }
 
                 if (chargeTime >= requiredTicks) {
 
