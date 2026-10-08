@@ -5,9 +5,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.phys.Vec3;
 import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
+import se.mickelus.tetra.effect.ItemEffect;
+import se.mickelus.tetra.properties.AttributeHelper;
+import se.mickelus.tetra.properties.TetraAttributes;
 
 public final class TetraCrossbowProjectileHelper {
 
@@ -109,6 +118,11 @@ public final class TetraCrossbowProjectileHelper {
             return false;
         }
 
+        if (!(crossbowStack.getItem()
+                instanceof ModularCrossbowItemImpl crossbow)) {
+            return false;
+        }
+
         CompoundTag tag = crossbowStack.getTag();
 
         if (tag == null) {
@@ -132,25 +146,85 @@ public final class TetraCrossbowProjectileHelper {
             return false;
         }
 
-        net.minecraft.world.entity.projectile.AbstractArrow arrow =
-                arrowItem.createArrow(
-                        maid.level(),
-                        ammoStack,
-                        maid
+        // ===== Tetra 拉力計算 =====
+
+        Attribute drawStrengthAttribute =
+                TetraAttributes.drawStrength.get();
+
+        AttributeInstance drawStrengthInstance =
+                maid.getAttribute(drawStrengthAttribute);
+
+        double strength;
+
+        if (drawStrengthInstance != null) {
+            strength = AttributeHelper.calculateValue(
+                    drawStrengthAttribute,
+                    drawStrengthInstance.getModifiers(),
+                    crossbow.getAttributeModifiersCached(crossbowStack)
+                            .get(drawStrengthAttribute)
+            );
+        } else {
+            strength = crossbow.getAttributeValue(
+                    crossbowStack,
+                    drawStrengthAttribute
+            );
+        }
+
+        // ===== Tetra 箭矢速度 =====
+
+        float velocityBonus =
+                crossbow.getEffectLevel(
+                        crossbowStack,
+                        ItemEffect.velocity
+                ) / 100.0F;
+
+        float projectileVelocity =
+                ModularCrossbowItemImpl.getProjectileVelocity(
+                        strength,
+                        velocityBonus
                 );
 
-        arrow.setSoundEvent(
-                net.minecraft.sounds.SoundEvents.CROSSBOW_HIT
+        // ===== 穿透效果 =====
+
+        int piercingLevel =
+                crossbow.getEffectLevel(
+                        crossbowStack,
+                        ItemEffect.piercing
+                ) + EnchantmentHelper.getItemEnchantmentLevel(
+                        Enchantments.PIERCING,
+                        crossbowStack
+                );
+
+        // ===== 多重射擊數量 =====
+
+        int multishotEnchantLevel =
+                EnchantmentHelper.getItemEnchantmentLevel(
+                        Enchantments.MULTISHOT,
+                        crossbowStack
+                ) * 3;
+
+        int projectileCount = Math.max(
+                crossbow.getEffectLevel(
+                        crossbowStack,
+                        ItemEffect.multishot
+                ) + multishotEnchantLevel,
+                1
         );
 
-        arrow.setShotFromCrossbow(true);
-        arrow.setCritArrow(true);
+        // ===== 多重射擊散射角度 =====
+
+        double spread = crossbow.getEffectEfficiency(
+                crossbowStack,
+                ItemEffect.multishot
+        );
+
+        if (spread == 0.0 && multishotEnchantLevel > 0) {
+            spread = 10.0;
+        }
+
+        // ===== 瞄準目標 =====
 
         double dx = target.getX() - maid.getX();
-
-        double dy = target.getY()
-                + target.getBbHeight() * 0.5
-                - arrow.getY();
 
         double dz = target.getZ() - maid.getZ();
 
@@ -158,28 +232,111 @@ public final class TetraCrossbowProjectileHelper {
                 dx * dx + dz * dz
         );
 
-        arrow.shoot(
-                dx,
-                dy + horizontalDistance * 0.1,
-                dz,
-                3.15F,
-                1.0F
+        // 先建立第一支箭，取得投射物的實際生成高度
+        AbstractArrow firstArrow = arrowItem.createArrow(
+                maid.level(),
+                ammoStack,
+                maid
         );
 
-        boolean spawned = maid.level().addFreshEntity(arrow);
+        double dy = target.getY()
+                + target.getBbHeight() * 0.5
+                - firstArrow.getY();
 
-        if (!spawned) {
+        // 建立中心射擊方向
+        Vec3 baseDirection = new Vec3(
+                dx,
+                dy + horizontalDistance * 0.1,
+                dz
+        ).normalize();
+
+        int spawnedCount = 0;
+
+        // ===== 依照多重射擊數量生成箭矢 =====
+
+        for (int i = 0; i < projectileCount; i++) {
+
+            AbstractArrow arrow;
+
+            if (i == 0) {
+                arrow = firstArrow;
+            } else {
+                arrow = arrowItem.createArrow(
+                        maid.level(),
+                        ammoStack,
+                        maid
+                );
+            }
+
+            arrow.setSoundEvent(
+                    net.minecraft.sounds.SoundEvents.CROSSBOW_HIT
+            );
+
+            arrow.setShotFromCrossbow(true);
+            arrow.setCritArrow(true);
+
+            // Tetra 原生傷害公式
+            arrow.setBaseDamage(
+                    arrow.getBaseDamage() - 2.0F + strength / 3.0F
+            );
+
+            if (projectileVelocity > 1.0F) {
+                arrow.setBaseDamage(
+                        arrow.getBaseDamage() / projectileVelocity
+                );
+            }
+
+            // 穿透效果
+            if (piercingLevel > 0) {
+                arrow.setPierceLevel((byte) piercingLevel);
+            }
+
+            // Tetra 原生的多重射擊角度公式
+            double angleDegrees =
+                    -spread * (projectileCount - 1) / 2.0
+                            + spread * i;
+
+            double angleRadians = Math.toRadians(angleDegrees);
+
+            double cos = Math.cos(angleRadians);
+            double sin = Math.sin(angleRadians);
+
+            // 將中心方向繞 Y 軸旋轉
+            double rotatedX =
+                    baseDirection.x * cos
+                            - baseDirection.z * sin;
+
+            double rotatedZ =
+                    baseDirection.x * sin
+                            + baseDirection.z * cos;
+
+            arrow.shoot(
+                    rotatedX,
+                    baseDirection.y,
+                    rotatedZ,
+                    projectileVelocity * 3.15F,
+                    1.0F
+            );
+
+            boolean spawned = maid.level().addFreshEntity(arrow);
+
+            if (spawned) {
+                spawnedCount++;
+            }
+        }
+
+        // 沒有任何箭矢成功生成時，保留裝填狀態
+        if (spawnedCount == 0) {
             return false;
         }
 
-        // 確認投射物成功生成後，才清除裝填資料
+        // ===== 射擊成功後清除裝填狀態 =====
+
         tag.remove("ChargedProjectiles");
 
-        if (crossbowStack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow) {
-            crossbow.setLoaded(crossbowStack, false);
-        }
+        crossbow.setLoaded(crossbowStack, false);
 
+        // 每次射擊只消耗一次耐久度
         crossbowStack.hurtAndBreak(
                 1,
                 maid,
