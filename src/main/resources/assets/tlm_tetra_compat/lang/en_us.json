@@ -1,0 +1,6 @@
+{
+  "task.tlm_tetra_compat.tetra_bow_attack": "Tetra Archer",
+  "task.tlm_tetra_compat.tetra_bow_attack.desc": "The maid uses Tetra modular bows to attack nearby hostile mobs.",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_bow": "Holding a Tetra bow in the main hand",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_arrow": "Has arrows in inventory"
+}

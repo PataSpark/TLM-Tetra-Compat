@@ -1,0 +1,6 @@
+{
+  "task.tlm_tetra_compat.tetra_bow_attack": "Tetra 弓兵",
+  "task.tlm_tetra_compat.tetra_bow_attack.desc": "女僕會使用 Tetra 模組弓，主動射擊附近的敵對生物。",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_bow": "主手持有 Tetra 弓",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_arrow": "背包內有箭"
+}

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.resources.ResourceLocation;
 import se.mickelus.tetra.items.modular.impl.bow.ModularBowItem;
@@ -28,7 +29,7 @@ public class TetraBowAttack extends TaskBowAttack {
 
     @Override
     public ItemStack getIcon() {
-        return new ItemStack(ModularBowItem.instance);
+        return new ItemStack(Items.BOW);
     }
 
     @Override
@@ -64,6 +65,31 @@ public class TetraBowAttack extends TaskBowAttack {
                 Pair.of(5, stopAttackingTask),
                 Pair.of(5, moveToTargetTask),
                 Pair.of(5, maidAttackStrafingTask),
+                Pair.of(5, shootTargetTask)
+        );
+    }
+
+    @Override
+    public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createRideBrainTasks(
+            EntityMaid maid) {
+
+        BehaviorControl<EntityMaid> findTargetTask =
+                StartAttacking.create(
+                        this::hasTetraBowAndArrow,
+                        IRangedAttackTask::findFirstValidAttackTarget
+                );
+
+        BehaviorControl<EntityMaid> stopAttackingTask =
+                StopAttackingIfTargetInvalid.create(
+                        target -> !hasTetraBowAndArrow(maid)
+                );
+
+        BehaviorControl<EntityMaid> shootTargetTask =
+                new TetraShootTargetTask();
+
+        return Lists.newArrayList(
+                Pair.of(5, findTargetTask),
+                Pair.of(5, stopAttackingTask),
                 Pair.of(5, shootTargetTask)
         );
     }

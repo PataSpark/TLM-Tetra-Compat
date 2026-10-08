@@ -1,0 +1,6 @@
+{
+  "task.tlm_tetra_compat.tetra_bow_attack": "Tetra 弓兵",
+  "task.tlm_tetra_compat.tetra_bow_attack.desc": "メイドは Tetra のモジュラー弓を使い、周囲の敵対モブを自動的に攻撃します。",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_bow": "メインハンドに Tetra の弓を装備",
+  "task.tlm_tetra_compat.tetra_bow_attack.condition.has_arrow": "インベントリに矢がある"
+}
