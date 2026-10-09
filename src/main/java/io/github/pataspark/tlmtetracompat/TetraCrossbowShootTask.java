@@ -9,7 +9,6 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
-import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
 
 import java.util.Map;
 
@@ -41,8 +40,9 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
             ServerLevel level,
             EntityMaid maid) {
 
-        return maid.getMainHandItem().getItem()
-                instanceof ModularCrossbowItemImpl
+        return TetraLegacyCrossbowCompat.isTetraCrossbow(
+                maid.getMainHandItem()
+        )
                 && maid.getBrain()
                 .getMemory(MemoryModuleType.ATTACK_TARGET)
                 .filter(LivingEntity::isAlive)
@@ -116,8 +116,7 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
 
         ItemStack stack = maid.getMainHandItem();
 
-        if (!(stack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow)) {
+        if (!TetraLegacyCrossbowCompat.isTetraCrossbow(stack)) {
             return;
         }
 
@@ -145,8 +144,7 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
                 chargeTime++;
 
                 int requiredTicks =
-                        TetraCrossbowVersionCompat.getReloadDuration(
-                                crossbow,
+                        TetraLegacyCrossbowCompat.getReloadDuration(
                                 stack,
                                 maid
                         );

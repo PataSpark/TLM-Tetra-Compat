@@ -12,8 +12,6 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.Mth;
 
-import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
-
 import java.util.Map;
 
 public class TetraCrossbowStrafingTask extends Behavior<EntityMaid> {
@@ -50,8 +48,9 @@ public class TetraCrossbowStrafingTask extends Behavior<EntityMaid> {
             ServerLevel level,
             EntityMaid maid) {
 
-        return maid.getMainHandItem().getItem()
-                instanceof ModularCrossbowItemImpl
+        return TetraLegacyCrossbowCompat.isTetraCrossbow(
+                maid.getMainHandItem()
+        )
                 && maid.getBrain()
                 .getMemory(MemoryModuleType.ATTACK_TARGET)
                 .filter(LivingEntity::isAlive)

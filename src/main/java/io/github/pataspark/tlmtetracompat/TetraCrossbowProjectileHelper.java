@@ -15,9 +15,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import se.mickelus.tetra.event.ModularProjectileSpawnEvent;
-import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
 import se.mickelus.tetra.effect.ItemEffect;
-import se.mickelus.tetra.properties.AttributeHelper;
+import se.mickelus.tetra.items.modular.ModularItem;
 import se.mickelus.tetra.properties.TetraAttributes;
 
 public final class TetraCrossbowProjectileHelper {
@@ -26,38 +25,32 @@ public final class TetraCrossbowProjectileHelper {
     }
 
     public static boolean hasLoadedProjectile(ItemStack crossbowStack) {
-
-        if (!(crossbowStack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow)) {
+        if (!TetraLegacyCrossbowCompat.isTetraCrossbow(crossbowStack)) {
             return false;
         }
 
         CompoundTag tag = crossbowStack.getTag();
 
-        if (tag == null) {
+        if (tag == null || !tag.contains("ChargedProjectiles", 9)) {
             return false;
         }
 
-        ListTag projectiles = tag.getList(
-                "ChargedProjectiles",
-                10
-        );
+        ListTag projectiles = tag.getList("ChargedProjectiles", 10);
 
-        return crossbow.isLoaded(crossbowStack)
-                && !projectiles.isEmpty();
+        return !projectiles.isEmpty()
+                && TetraLegacyCrossbowCompat.isLoaded(crossbowStack);
     }
 
     public static boolean loadArrow(
             EntityMaid maid,
             ItemStack crossbowStack) {
 
-        if (!(crossbowStack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow)) {
+        if (!TetraLegacyCrossbowCompat.isTetraCrossbow(crossbowStack)) {
             return false;
         }
 
         // 已經裝填時，不重複消耗箭矢
-        if (crossbow.isLoaded(crossbowStack)) {
+        if (TetraLegacyCrossbowCompat.isLoaded(crossbowStack)) {
             return hasLoadedProjectile(crossbowStack);
         }
 
@@ -99,7 +92,7 @@ public final class TetraCrossbowProjectileHelper {
                     loadedProjectiles
             );
 
-            crossbow.setLoaded(crossbowStack, true);
+            TetraLegacyCrossbowCompat.setLoaded(crossbowStack, true);
 
             return true;
         }
@@ -120,10 +113,11 @@ public final class TetraCrossbowProjectileHelper {
             return false;
         }
 
-        if (!(crossbowStack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow)) {
+        if (!TetraLegacyCrossbowCompat.isTetraCrossbow(crossbowStack)) {
             return false;
         }
+
+        ModularItem crossbow = (ModularItem) crossbowStack.getItem();
 
         CompoundTag tag = crossbowStack.getTag();
 
@@ -159,7 +153,7 @@ public final class TetraCrossbowProjectileHelper {
         double strength;
 
         if (drawStrengthInstance != null) {
-            strength = AttributeHelper.calculateValue(
+            strength = TetraAttributeCompat.calculateValue(
                     drawStrengthAttribute,
                     drawStrengthInstance.getModifiers(),
                     crossbow.getAttributeModifiersCached(crossbowStack)
@@ -181,7 +175,8 @@ public final class TetraCrossbowProjectileHelper {
                 ) / 100.0F;
 
         float projectileVelocity =
-                ModularCrossbowItemImpl.getProjectileVelocity(
+                TetraLegacyCrossbowCompat.getProjectileVelocity(
+                        crossbowStack,
                         strength,
                         velocityBonus
                 );
@@ -358,7 +353,7 @@ public final class TetraCrossbowProjectileHelper {
 
         tag.remove("ChargedProjectiles");
 
-        crossbow.setLoaded(crossbowStack, false);
+        TetraLegacyCrossbowCompat.setLoaded(crossbowStack, false);
 
         // 每次射擊只消耗一次耐久度
         crossbowStack.hurtAndBreak(
