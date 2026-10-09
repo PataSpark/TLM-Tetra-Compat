@@ -144,10 +144,12 @@ public class TetraCrossbowShootTask extends Behavior<EntityMaid> {
 
                 chargeTime++;
 
-                int requiredTicks = crossbow.getReloadDuration(
-                        stack,
-                        maid
-                );
+                int requiredTicks =
+                        TetraCrossbowVersionCompat.getReloadDuration(
+                                crossbow,
+                                stack,
+                                maid
+                        );
 
                 if (chargeTime >= requiredTicks) {
 
