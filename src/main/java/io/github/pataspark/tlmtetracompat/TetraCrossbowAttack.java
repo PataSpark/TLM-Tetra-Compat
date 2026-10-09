@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import se.mickelus.tetra.items.modular.impl.crossbow.ModularCrossbowItemImpl;
+
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class TetraCrossbowAttack extends TaskCrossBowAttack {
 
     @Override
     public boolean isWeapon(EntityMaid maid, ItemStack stack) {
-        return stack.getItem() instanceof ModularCrossbowItemImpl;
+        return TetraLegacyCrossbowCompat.isTetraCrossbow(stack);
     }
 
     @Override
@@ -102,13 +102,12 @@ public class TetraCrossbowAttack extends TaskCrossBowAttack {
 
         ItemStack crossbowStack = maid.getMainHandItem();
 
-        if (!(crossbowStack.getItem()
-                instanceof ModularCrossbowItemImpl crossbow)) {
+        if (!TetraLegacyCrossbowCompat.isTetraCrossbow(crossbowStack)) {
             return false;
         }
 
         // 已裝填時，即使背包沒有箭也允許攻擊
-        if (crossbow.isLoaded(crossbowStack)) {
+        if (TetraLegacyCrossbowCompat.isLoaded(crossbowStack)) {
             return true;
         }
 

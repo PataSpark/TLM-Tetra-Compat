@@ -17,6 +17,7 @@ import se.mickelus.tetra.items.modular.impl.bow.ModularBowItem;
 import se.mickelus.tetra.properties.TetraAttributes;
 import se.mickelus.tetra.effect.ItemEffect;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import java.lang.reflect.Method;
 
 public class TetraBowProjectileHelper {
 
@@ -35,7 +36,46 @@ public class TetraBowProjectileHelper {
 
         ModularBowItem bow = (ModularBowItem) bowStack.getItem();
 
-        return bow.getDrawDuration(maid, bowStack);
+        try {
+            // 新版 Tetra：getDrawDuration(LivingEntity, ItemStack)
+            Method method = bow.getClass().getMethod(
+                    "getDrawDuration",
+                    LivingEntity.class,
+                    ItemStack.class
+            );
+
+            return ((Number) method.invoke(
+                    bow,
+                    maid,
+                    bowStack
+            )).intValue();
+
+        } catch (NoSuchMethodException ignored) {
+            // 舊版 Tetra：getDrawDuration(ItemStack)
+            try {
+                Method method = bow.getClass().getMethod(
+                        "getDrawDuration",
+                        ItemStack.class
+                );
+
+                return ((Number) method.invoke(
+                        bow,
+                        bowStack
+                )).intValue();
+
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException(
+                        "Failed to get Tetra bow draw duration",
+                        e
+                );
+            }
+
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(
+                    "Failed to get Tetra bow draw duration",
+                    e
+            );
+        }
     }
 
     public static float getArrowVelocity(
